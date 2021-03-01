@@ -4,6 +4,7 @@ package procesosmulticolas;
 public class Nodo {
     
     private String llave;
+    private int prioridad;
     private int rafaga;
     private int llegada;
     private int comienzo;
@@ -12,9 +13,10 @@ public class Nodo {
     private int indice;
     private Nodo siguiente;
     
-    Nodo(String llave, int rafaga, int llegada, int indice){
+    Nodo(String llave, int prioridad, int rafaga, int llegada, int indice){
     
         this.llave = llave;
+        this.prioridad = prioridad;
         this.rafaga = rafaga;
         this.llegada = llegada;
         this.indice = indice;
@@ -36,6 +38,14 @@ public class Nodo {
 
     public void setLlave(String llave) {
         this.llave = llave;
+    }
+
+    public int getPrioridad() {
+        return prioridad;
+    }
+
+    public void setPrioridad(int prioridad) {
+        this.prioridad = prioridad;
     }
 
     public int getRafaga() {
@@ -85,5 +95,5 @@ public class Nodo {
     public void setIndice(int indice) {
         this.indice = indice;
     }
-    
+  
 }

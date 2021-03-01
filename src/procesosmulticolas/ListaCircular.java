@@ -16,9 +16,9 @@ public class ListaCircular {
        
     }
     
-    void insertar(String s, int r, int l, int i){
+    void insertar(String s, int prio, int r, int l, int i){
         
-        Nodo p = new Nodo(s, r, l, i);
+        Nodo p = new Nodo(s, prio, r, l, i);
         Nodo sig = null;
         
         if(cabeza == null){

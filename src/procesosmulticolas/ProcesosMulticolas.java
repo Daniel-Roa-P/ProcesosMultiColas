@@ -45,7 +45,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
     JLabel label2 = new JLabel("Nombre del proceso: ");
     JLabel label3 = new JLabel("Proceso en ejecucion: Ninguno");
     JLabel label4 = new JLabel("Tiempo: ");
-    JLabel label5 = new JLabel("Tabla de procesos (Round Robin - Limite de ejecucion: 4):");
+    JLabel label5 = new JLabel("Tabla de procesos (Round Robin - Limite de ejecucion: 5):");
     JLabel label6 = new JLabel("Diagrama de Gant:");
     JLabel label7 = new JLabel("Tabla de Bloqueados:");
     JLabel label8 = new JLabel("Rafaga restante del proceso: 0");
@@ -59,22 +59,26 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
     JButton botonAleatorioRoundRobin = new JButton("Ingresar aleatorios (3)");
     JButton botonAleatorioCorta = new JButton("Ingresar aleatorios (3)");
     JButton botonAleatorioPrioridad = new JButton("Ingresar aleatorios (3)");
-    JButton botonIniciar = new JButton("Iniciar ejecucion");
-    JButton botonBloquear = new JButton("Bloquear proceso");
+    JButton botonIniciar = new JButton("Iniciar ejecucion - tiempo de envejecimiento: 3 segundos");
+    JButton botonBloquear = new JButton("Bloquear proceso actual");
     
     JTextField tfNombre = new JTextField("A1");
     JTextField tfNombre2 = new JTextField("B1");
     JTextField tfNombre3 = new JTextField("C1");
     
     JTextField[][] tabla = new JTextField[100][7];
+    JTextField[][] tabla2 = new JTextField[100][2];
+    JTextField[][] tabla3 = new JTextField[100][3];
     JTextField[][] tablaBloqueados = new JTextField[100][3];
     JLabel[][] diagrama = new JLabel[40][100];  
     
-    ListaCircular cola = new ListaCircular();
+    ListaCircular colaRoundRobin = new ListaCircular();
+    ListaCircular colaCorta = new ListaCircular();
+    ListaCircular colaPrioridad= new ListaCircular();
     
     Nodo nodoEjecutado;
     
-    int filas = 0, rafagaTemporal;
+    int filasRoundRobin = 0, filasCorta = 0, filasPrioridad = 0, rafagaTemporal;
     int tiempoGlobal = 0;
     int coorX = 0;
     
@@ -245,7 +249,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
      
     }
     
-    public void dibujarTabla(String nombre, int rafaga, int tiempo){
+    public void dibujarTablaRoundRobin(String nombre, int rafaga, int tiempo){
         
         scrollPane.removeAll();
         
@@ -273,7 +277,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
         scrollPane.add(texto6);
         scrollPane.add(texto7);
         
-        for(int i = 0; i<filas; i++){
+        for(int i = 0; i<filasRoundRobin; i++){
             
             for(int j = 0; j<7; j++){
             
@@ -294,18 +298,104 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
         
         }
         
-        tabla[filas-1][0].setText(nombre);
-        tabla[filas-1][1].setText(Integer.toString(tiempo));
-        tabla[filas-1][2].setText(Integer.toString(rafaga));
+        tabla[filasRoundRobin-1][0].setText(nombre);
+        tabla[filasRoundRobin-1][1].setText(Integer.toString(tiempo));
+        tabla[filasRoundRobin-1][2].setText(Integer.toString(rafaga));
 
         scrollPane.repaint();
         scrollPane1.setViewportView(scrollPane);
-            
-        scrollPane7.setViewportView(scrollPane6);
         
     }
     
-    public void llenarBloqueados(){
+    public void dibujarTablaCorta(ListaCircular cola, JScrollPane scrollPar, JScrollPane scrollImpar){
+        
+        scrollPar.removeAll();
+        
+        JLabel texto1 = new JLabel("Proceso");
+        JLabel texto2 = new JLabel("Rafaga");
+        
+        texto1.setBounds(20, 20, 150, 20);
+        texto2.setBounds(100, 20, 150, 20);
+        
+        scrollPar.add(texto1);
+        scrollPar.add(texto2);
+        
+        if(cola.getCabeza() != null){
+        
+        Nodo temp = cola.getCabeza().getSiguiente();
+        
+            for(int i = 0; i<cola.getTamaño(); i++){
+
+                for(int j = 0; j<2 ; j++){
+
+                        tabla2[i][j] = new JTextField("");
+                        tabla2[i][j].setBounds(20 + (j*80), 40 + (i*25), 70, 20);
+
+                        scrollPar.add(tabla2[i][j]);
+
+                }
+
+                tabla2[i][0].setText(temp.getLlave());
+                tabla2[i][1].setText(Integer.toString(temp.getRafaga()));
+                
+                temp = temp.getSiguiente();
+
+            }
+        
+        }
+        
+        scrollPar.repaint();
+        scrollImpar.setViewportView(scrollPar);
+        
+    }
+    
+    public void dibujarTablaPrioridad(ListaCircular cola, JScrollPane scrollPar, JScrollPane scrollImpar){
+        
+        scrollPar.removeAll();
+        
+        JLabel texto1 = new JLabel("Proceso");
+        JLabel texto2 = new JLabel("Rafaga");
+        JLabel texto3 = new JLabel("Prioridad");
+        
+        texto1.setBounds(20, 20, 150, 20);
+        texto2.setBounds(100, 20, 150, 20);
+        texto3.setBounds(180, 20, 150, 20);
+        
+        scrollPar.add(texto1);
+        scrollPar.add(texto2);
+        scrollPar.add(texto3);
+        
+        if(cola.getCabeza() != null){
+        
+        Nodo temp = cola.getCabeza().getSiguiente();
+        
+            for(int i = 0; i<cola.getTamaño(); i++){
+
+                for(int j = 0; j<3 ; j++){
+
+                        tabla3[i][j] = new JTextField("");
+                        tabla3[i][j].setBounds(20 + (j*80), 40 + (i*25), 70, 20);
+
+                        scrollPar.add(tabla3[i][j]);
+
+                }
+
+                tabla3[i][0].setText(temp.getLlave());
+                tabla3[i][1].setText(Integer.toString(temp.getRafaga()));
+                tabla3[i][2].setText(Integer.toString(temp.getPrioridad()));
+                
+                temp = temp.getSiguiente();
+
+            }
+        
+        }
+        
+        scrollPar.repaint();
+        scrollImpar.setViewportView(scrollPar);
+        
+    }
+    
+    public void llenarBloqueados( ListaCircular cola, JScrollPane scrollPar, JScrollPane scrollImpar){
         
         scrollPane4.removeAll();
         
@@ -332,7 +422,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
                         tablaBloqueados[i][j] = new JTextField("");
                         tablaBloqueados[i][j].setBounds(20 + (j*80), 40 + (i*25), 70, 20);
 
-                        scrollPane4.add(tablaBloqueados[i][j]);
+                        scrollPar.add(tablaBloqueados[i][j]);
 
                 }
 
@@ -346,8 +436,8 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
         
         }
         
-        scrollPane4.repaint();
-        scrollPane5.setViewportView(scrollPane4);
+        scrollPar.repaint();
+        scrollImpar.setViewportView(scrollPar);
         
     }
     
@@ -398,7 +488,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
         Image imgEscalada = imgIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
         Icon iconoEscalado = new ImageIcon(imgEscalada);
         
-        for(int i = 1; i < filas + 1; i++){
+        for(int i = 1; i < filasRoundRobin + 1; i++){
             
             for(int j = 0; j < coorX+1; j++){
                 
@@ -423,15 +513,15 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
             
     }
     
-    public void ingresar(String nombre, int rafaga, int tiempo, int filas){
+    public void ingresar(ListaCircular cola, String nombre, int prioridad , int rafaga, int tiempo, int filas){
         
-        cola.insertar(nombre, rafaga, tiempo, filas);
+        cola.insertar(nombre, prioridad, rafaga, tiempo, filas);
         
     }
     
     public int calcularRafaga(){
         
-        return 1 + ((int) (Math.random()*12));
+        return 1 + ((int) (Math.random()*10));
         
     }
     
@@ -440,15 +530,91 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
     
         if(e.getSource() == botonIngresarRoundRobin){
             
-            filas++;
+            filasRoundRobin++;
             
             String nombre = tfNombre.getText();
             rafagaTemporal = calcularRafaga();
             
-            ingresar(nombre, rafagaTemporal, tiempoGlobal, filas);
-            dibujarTabla(nombre, rafagaTemporal, tiempoGlobal);
+            ingresar(colaRoundRobin, nombre, 0,rafagaTemporal, tiempoGlobal, filasRoundRobin);
+            dibujarTablaRoundRobin(nombre, rafagaTemporal, tiempoGlobal);
             
-            tfNombre.setText("A" + (filas + 1));
+            tfNombre.setText("A" + (filasRoundRobin + 1));
+            
+        } else if(e.getSource() == botonIngresarCorta){
+        
+            filasCorta++;
+            
+            String nombre = tfNombre2.getText();
+            rafagaTemporal = calcularRafaga();
+            
+            ingresar(colaCorta, nombre, 0, rafagaTemporal, tiempoGlobal, filasCorta);
+            dibujarTablaCorta(colaCorta, scrollPane6, scrollPane7);
+            
+            tfNombre2.setText("B" + (filasCorta + 1));
+            
+        } else if(e.getSource() == botonIngresarPrioridad){
+        
+            filasPrioridad++;
+            
+            String nombre = tfNombre3.getText();
+            String p = String.valueOf(prioridad.getSelectedItem());
+            int prio = Integer.parseInt(p);
+            rafagaTemporal = calcularRafaga();
+            
+            ingresar(colaPrioridad, nombre, prio, rafagaTemporal, tiempoGlobal, filasPrioridad);
+            dibujarTablaPrioridad(colaPrioridad, scrollPane8, scrollPane9);
+            
+            tfNombre3.setText("C" + (filasPrioridad + 1));
+            
+        } else if(e.getSource() == botonAleatorioRoundRobin){
+        
+            for(int i = 0; i<3; i++){
+                
+                filasRoundRobin++;
+            
+                String nombre = tfNombre.getText();
+                rafagaTemporal = calcularRafaga();
+
+                ingresar(colaRoundRobin, nombre, 0, rafagaTemporal, tiempoGlobal, filasRoundRobin);
+                dibujarTablaRoundRobin(nombre, rafagaTemporal, tiempoGlobal);
+
+                tfNombre.setText("A" + (filasRoundRobin + 1));
+            
+            }
+            
+        } else if(e.getSource() == botonAleatorioCorta){
+        
+            for(int i = 0; i<3; i++){
+                
+                filasCorta++;
+            
+                String nombre = tfNombre2.getText();
+                rafagaTemporal = calcularRafaga();
+
+                ingresar(colaCorta, nombre, 0, rafagaTemporal, tiempoGlobal, filasCorta);
+                dibujarTablaCorta(colaCorta, scrollPane6, scrollPane7);
+
+                tfNombre2.setText("B" + (filasCorta + 1));
+            
+            }
+            
+        } else if(e.getSource() == botonAleatorioPrioridad){
+        
+            for(int i = 0; i<3; i++){
+                
+                filasPrioridad++;
+            
+                String nombre = tfNombre3.getText();
+                String p = String.valueOf(prioridad.getSelectedItem());
+                int prio = (int) (Math.random() * 5) + 1;
+                rafagaTemporal = calcularRafaga();
+
+                ingresar(colaPrioridad, nombre, prio, rafagaTemporal, tiempoGlobal, filasPrioridad);
+                dibujarTablaPrioridad(colaPrioridad, scrollPane8, scrollPane9);
+
+                tfNombre3.setText("C" + (filasPrioridad + 1));
+            
+            }
             
         } else if(e.getSource() == botonIniciar){
         
@@ -459,14 +625,14 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
         
             if(nodoEjecutado.getRafaga() != 0){
             
-                filas++;
-                ingresar(nodoEjecutado.getLlave() + "*", nodoEjecutado.getRafaga(), tiempoGlobal, filas);
-                dibujarTabla(nodoEjecutado.getLlave() + "*", nodoEjecutado.getRafaga(), tiempoGlobal);
+                filasRoundRobin++;
+                ingresar(colaRoundRobin, nodoEjecutado.getLlave() + "*", 0,nodoEjecutado.getRafaga(), tiempoGlobal, filasRoundRobin);
+                dibujarTablaRoundRobin(nodoEjecutado.getLlave() + "*", nodoEjecutado.getRafaga(), tiempoGlobal);
                 nodoEjecutado.setFinalizacion(tiempoGlobal);
                 llenarRestante();
-                cola.eliminar(cola.getCabeza());
-                llenarBloqueados();
-                nodoEjecutado = cola.getCabeza();
+                colaRoundRobin.eliminar(colaRoundRobin.getCabeza());
+                llenarBloqueados(colaRoundRobin, scrollPane4, scrollPane5);
+                nodoEjecutado = colaRoundRobin.getCabeza();
                 nodoEjecutado.setComienzo(tiempoGlobal);
 
             }
@@ -479,16 +645,16 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
     
             try{
 
-            while(cola.getTamaño() != 0){
+            while(colaRoundRobin.getTamaño() != 0){
                 
                 dibujarSemaforo("Rojo.jpg");
                 
-                nodoEjecutado = cola.getCabeza();
+                nodoEjecutado = colaRoundRobin.getCabeza();
                 nodoEjecutado.setComienzo(tiempoGlobal);
                 
                 int tiempoEjecutado = 0;
                 
-                while(nodoEjecutado.getRafaga() > 0 && tiempoEjecutado < 4){
+                while(nodoEjecutado.getRafaga() > 0 && tiempoEjecutado < 5){
                     
                     nodoEjecutado.setRafaga(nodoEjecutado.getRafaga()-1);
                     
@@ -497,7 +663,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
                     label8.setText("Rafaga restante del proceso: " + nodoEjecutado.getRafaga());
                     
                     dibujarDiagrama(nodoEjecutado.getLlave(), coorX, nodoEjecutado.getIndice());
-                    llenarBloqueados();
+                    llenarBloqueados(colaRoundRobin, scrollPane4, scrollPane5);
                     
                     tiempoGlobal++;
                     coorX++;
@@ -516,16 +682,16 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
                 
                 if(nodoEjecutado.getRafaga() == 0){
                 
-                    cola.eliminar(cola.getCabeza());
+                    colaRoundRobin.eliminar(colaRoundRobin.getCabeza());
                     
-                } else if (tiempoEjecutado == 4){
+                } else if (tiempoEjecutado == 5){
                 
-                    cola.getCabeza().setLlave(cola.getCabeza().getLlave());
-                    cola.intercambiar(cola.getCabeza());
+                    colaRoundRobin.getCabeza().setLlave(colaRoundRobin.getCabeza().getLlave());
+                    colaRoundRobin.intercambiar(colaRoundRobin.getCabeza());
                     
                 }
                                
-                llenarBloqueados();
+                llenarBloqueados(colaRoundRobin, scrollPane4, scrollPane5);
                 
             }
 
