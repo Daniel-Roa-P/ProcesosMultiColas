@@ -70,7 +70,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
     JTextField[][] tabla2 = new JTextField[100][2];
     JTextField[][] tabla3 = new JTextField[100][3];
     JTextField[][] tablaBloqueados = new JTextField[100][3];
-    JLabel[][] diagrama = new JLabel[40][100];  
+    JLabel[][] diagrama = new JLabel[50][200];  
     
     ListaCircular colaRoundRobin = new ListaCircular();
     ListaCircular colaCorta = new ListaCircular();
@@ -88,7 +88,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
 
         ProcesosMulticolas pm = new ProcesosMulticolas(); 
         pm.setBounds(0, 0, 1320, 730);
-        pm.setTitle("Procesos con expulsion");
+        pm.setTitle("Procesos con multiples colas");
         pm.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pm.setVisible(true);
         
@@ -467,7 +467,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
         
         scrollPane2.removeAll();
         
-        for(int i = 0; i<100; i++){
+        for(int i = 0; i<200; i++){
             
             diagrama[0][i] = new JLabel(Integer.toString(i));
             diagrama[0][i].setBounds(40 + (i*20), 20, 20, 20);
@@ -519,9 +519,72 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
         
     }
     
+    public void ordenarRafagas(){
+        
+        int movimientos = 0;
+        int contador = 0;
+        
+        Nodo temp = colaCorta.getCabeza().getSiguiente();
+        
+        int menorRaf = colaCorta.getCabeza().getRafaga();
+        
+        while(!(temp.equals(colaCorta.getCabeza()))){
+    
+            contador++;
+            
+            if(temp.getRafaga() < menorRaf){
+            
+                menorRaf = temp.getRafaga();
+                movimientos = contador;
+                
+            }
+            
+            temp = temp.getSiguiente();
+            
+        }
+        
+        for(int i = 0; i < movimientos; i++){
+            
+            colaCorta.intercambiar(colaCorta.getCabeza());
+            
+        }
+        
+    }
+    
     public int calcularRafaga(){
         
-        return 1 + ((int) (Math.random()*10));
+        return 1 + ((int) (Math.random()*12));
+        
+    }
+    
+    public void cortaLlenaRound(){
+                
+        if( (tiempoGlobal%3 == 0) ){
+
+            for(int i = 0; i<3; i++){
+
+                if(colaCorta.getCabeza() != null){
+
+                    Nodo temp = colaCorta.getCabeza();
+                    filasRoundRobin++;
+                    ingresar(colaRoundRobin, temp.getLlave(), 0 , temp.getRafaga(), tiempoGlobal, filasRoundRobin);
+                    dibujarTablaRoundRobin(temp.getLlave(), temp.getRafaga(), tiempoGlobal);
+
+                    colaCorta.eliminar(colaCorta.getCabeza());
+
+                }
+
+            }
+
+        }
+        
+        dibujarTablaCorta(colaCorta, scrollPane6, scrollPane7);
+        
+    }
+    
+    public void prioLlenaCorta(){
+                
+        
         
     }
     
@@ -551,6 +614,8 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
             dibujarTablaCorta(colaCorta, scrollPane6, scrollPane7);
             
             tfNombre2.setText("B" + (filasCorta + 1));
+            
+            ordenarRafagas();
             
         } else if(e.getSource() == botonIngresarPrioridad){
         
@@ -592,11 +657,14 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
                 rafagaTemporal = calcularRafaga();
 
                 ingresar(colaCorta, nombre, 0, rafagaTemporal, tiempoGlobal, filasCorta);
+                
                 dibujarTablaCorta(colaCorta, scrollPane6, scrollPane7);
 
                 tfNombre2.setText("B" + (filasCorta + 1));
             
             }
+            
+            ordenarRafagas();
             
         } else if(e.getSource() == botonAleatorioPrioridad){
         
@@ -669,6 +737,8 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
                     coorX++;
                     tiempoEjecutado++;
                     
+                    cortaLlenaRound();
+                    
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
@@ -690,15 +760,13 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
                     colaRoundRobin.intercambiar(colaRoundRobin.getCabeza());
                     
                 }
-                               
-                llenarBloqueados(colaRoundRobin, scrollPane4, scrollPane5);
                 
             }
 
             dibujarSemaforo("Verde.jpg");
             label3.setText("Proceso en ejecucion: Ninguno");
             
-        } catch(Exception e){
+        }catch(Exception e){
         
             System.out.print("No se que poner aca :D");
             
