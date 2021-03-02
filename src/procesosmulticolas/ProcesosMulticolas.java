@@ -582,8 +582,60 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
         
     }
     
+    public void ordenarPrioridades(){
+        
+        int movimientos = 0;
+        int contador = 0;
+        
+        Nodo temp = colaPrioridad.getCabeza().getSiguiente();
+        
+        int menorPrio = colaPrioridad.getCabeza().getPrioridad();
+        
+        while(!(temp.equals(colaPrioridad.getCabeza()))){
+    
+            contador++;
+            
+            if(temp.getPrioridad() < menorPrio){
+            
+                menorPrio = temp.getPrioridad();
+                movimientos = contador;
+                
+            }
+            
+            temp = temp.getSiguiente();
+            
+        }
+        
+        for(int i = 0; i < movimientos; i++){
+            
+            colaPrioridad.intercambiar(colaPrioridad.getCabeza());
+            
+        }
+        
+    }
+    
     public void prioLlenaCorta(){
                 
+        if( (tiempoGlobal%3 == 0) ){
+
+            for(int i = 0; i<3; i++){
+
+                if(colaPrioridad.getCabeza() != null){
+
+                    Nodo temp = colaPrioridad.getCabeza();
+                    filasCorta++;
+                    ingresar(colaCorta, temp.getLlave(), 0 , temp.getRafaga(), tiempoGlobal, filasCorta);
+                    dibujarTablaCorta(colaCorta, scrollPane6, scrollPane7);
+
+                    colaPrioridad.eliminar(colaPrioridad.getCabeza());
+
+                }
+
+            }
+
+        }
+        
+        dibujarTablaPrioridad(colaPrioridad, scrollPane8, scrollPane9);
         
         
     }
@@ -630,6 +682,8 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
             dibujarTablaPrioridad(colaPrioridad, scrollPane8, scrollPane9);
             
             tfNombre3.setText("C" + (filasPrioridad + 1));
+            
+            ordenarPrioridades();
             
         } else if(e.getSource() == botonAleatorioRoundRobin){
         
@@ -738,6 +792,7 @@ public class ProcesosMulticolas extends JFrame implements Runnable ,ActionListen
                     tiempoEjecutado++;
                     
                     cortaLlenaRound();
+                    prioLlenaCorta();
                     
                     try {
                         Thread.sleep(1000);
